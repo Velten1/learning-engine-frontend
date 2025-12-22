@@ -7,12 +7,14 @@ import Modal from '@/components/ui/Modal';
 import Textarea from '@/components/ui/Textarea';
 import { PomodoroService } from '@/services/pomodoroService';
 import type { CurrentPomodoroResponse } from '@/api/pomodoro';
+import { isAuthenticated } from '@/api/config';
 
 export default function PomodoroTimer() {
   const [currentPomodoro, setCurrentPomodoro] =
     useState<CurrentPomodoroResponse | null>(null);
   const [time, setTime] = useState(20 * 60); // 20 minutos em segundos
   const [showAbandonModal, setShowAbandonModal] = useState(false);
+  const [showResetModal, setShowResetModal] = useState(false);
   const [abandonReason, setAbandonReason] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -28,7 +30,22 @@ export default function PomodoroTimer() {
   useEffect(() => {
     if (!isRunning || !currentPomodoro?.expiresAt) return;
 
+    let checkCount = 0;
+
     const interval = setInterval(() => {
+      // Verificar autenticação a cada 5 segundos
+      checkCount++;
+      if (checkCount >= 5) {
+        checkCount = 0;
+        if (!isAuthenticated()) {
+          // Sem token, parar timer e resetar estados
+          clearInterval(interval);
+          setCurrentPomodoro(null);
+          setTime(20 * 60);
+          return;
+        }
+      }
+
       const now = new Date();
       const expiresAt = new Date(currentPomodoro.expiresAt);
       const remainingSeconds = Math.max(
@@ -128,6 +145,36 @@ export default function PomodoroTimer() {
     setAbandonReason('');
   };
 
+  const handleReset = () => {
+    setShowResetModal(true);
+  };
+
+  const handleConfirmReset = async () => {
+    setIsLoading(true);
+    setError(null);
+
+    const result = await PomodoroService.reset();
+
+    if (result.success && result.data) {
+      const expiresAt = new Date(result.data.expiresAt);
+      const now = new Date();
+      const remainingSeconds = Math.floor(
+        (expiresAt.getTime() - now.getTime()) / 1000
+      );
+      setTime(remainingSeconds);
+      setShowResetModal(false);
+      await loadCurrentPomodoro();
+    } else {
+      setError(result.error || 'Erro ao resetar pomodoro');
+    }
+
+    setIsLoading(false);
+  };
+
+  const handleCancelReset = () => {
+    setShowResetModal(false);
+  };
+
   const handleComplete = async () => {
     setIsLoading(true);
     setError(null);
@@ -217,6 +264,24 @@ export default function PomodoroTimer() {
                   Desistir
                 </span>
               </Button>
+              <Button variant="secondary" size="lg" onClick={handleReset} disabled={isLoading}>
+                <span className="flex items-center gap-2">
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                    />
+                  </svg>
+                  Resetar
+                </span>
+              </Button>
               {time === 0 && (
                 <Button size="lg" onClick={handleComplete} disabled={isLoading}>
                   <span className="flex items-center gap-2">
@@ -282,6 +347,29 @@ export default function PomodoroTimer() {
             rows={3}
             required
           />
+        </div>
+      </Modal>
+
+      {/* Reset Modal */}
+      <Modal
+        isOpen={showResetModal}
+        onClose={handleCancelReset}
+        title="Resetar cronômetro?"
+        footer={
+          <>
+            <Button variant="secondary" onClick={handleCancelReset}>
+              Cancelar
+            </Button>
+            <Button variant="primary" onClick={handleConfirmReset} disabled={isLoading}>
+              {isLoading ? 'Resetando...' : 'Confirmar'}
+            </Button>
+          </>
+        }
+      >
+        <div className="space-y-4">
+          <p className="text-[#64748b]">
+            Você tem certeza que deseja resetar o cronômetro? O tempo será reiniciado para 20 minutos.
+          </p>
         </div>
       </Modal>
     </>

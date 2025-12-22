@@ -43,11 +43,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     applyTheme(newTheme);
   };
 
-  // Evitar flash de conteúdo não estilizado
-  if (!mounted) {
-    return <>{children}</>;
-  }
-
+  // Sempre fornecer o contexto, mesmo antes de estar montado
+  // Isso evita o erro "useTheme must be used within a ThemeProvider"
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
       {children}

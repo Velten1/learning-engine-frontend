@@ -65,5 +65,23 @@ export class PomodoroService {
       };
     }
   }
+
+  static async reset() {
+    try {
+      const pomodoro = await pomodoroApi.resetPomodoro();
+      return {
+        success: true,
+        data: pomodoro,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Erro ao resetar pomodoro',
+      };
+    }
+  }
 }
 

@@ -58,3 +58,10 @@ export async function completePomodoro(): Promise<PomodoroSession> {
   });
 }
 
+// Resetar uma sessão de Pomodoro
+export async function resetPomodoro(): Promise<PomodoroSession> {
+  return apiRequest<PomodoroSession>('/api/pomodoro/reset', {
+    method: 'POST',
+  });
+}
+
