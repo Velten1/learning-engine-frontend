@@ -7,8 +7,8 @@ export default function DashboardPage() {
         <div className="space-y-8">
           {/* Header */}
           <div className="space-y-3">
-            <h1 className="text-4xl font-bold text-[#0f172a]">Histórico</h1>
-            <p className="text-lg text-[#64748b]">
+            <h1 className="text-4xl font-bold text-[#0f172a] dark:text-[#f1f5f9]">Histórico</h1>
+            <p className="text-lg text-[#64748b] dark:text-[#94a3b8]">
               Revise suas reflexões e acompanhe seu progresso de aprendizado
             </p>
           </div>
@@ -16,8 +16,8 @@ export default function DashboardPage() {
           {/* Stats */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="glass rounded-xl p-4">
-              <div className="text-2xl font-bold text-[#0369a1]">12</div>
-              <div className="text-sm text-[#64748b] mt-1">Total de sessões</div>
+              <div className="text-2xl font-bold text-[#0369a1] dark:text-[#7dd3fc]">12</div>
+              <div className="text-sm text-[#64748b] dark:text-[#94a3b8] mt-1">Total de sessões</div>
             </div>
             <div className="glass rounded-xl p-4">
               <div className="text-2xl font-bold text-[#0369a1]">5h</div>

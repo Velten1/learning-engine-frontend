@@ -18,13 +18,13 @@ export default function Button({
   
   const variants = {
     primary:
-      'bg-[#0369a1] text-white hover:bg-[#0284c7] focus:ring-[#0369a1] shadow-sm hover:shadow-md',
+      'bg-[#0369a1] dark:bg-[#0284c7] text-white hover:bg-[#0284c7] dark:hover:bg-[#0ea5e9] focus:ring-[#0369a1] dark:focus:ring-[#7dd3fc] shadow-sm hover:shadow-md',
     secondary:
-      'bg-white/70 text-[#0369a1] border border-[#0369a1]/20 hover:bg-white/90 focus:ring-[#0369a1] shadow-sm hover:shadow-md',
+      'bg-white/70 dark:bg-slate-800/70 text-[#0369a1] dark:text-[#7dd3fc] border border-[#0369a1]/20 dark:border-[#7dd3fc]/30 hover:bg-white/90 dark:hover:bg-slate-800/90 focus:ring-[#0369a1] dark:focus:ring-[#7dd3fc] shadow-sm hover:shadow-md',
     danger:
-      'bg-red-500 text-white hover:bg-red-600 focus:ring-red-500 shadow-sm hover:shadow-md',
+      'bg-red-500 dark:bg-red-600 text-white hover:bg-red-600 dark:hover:bg-red-700 focus:ring-red-500 dark:focus:ring-red-600 shadow-sm hover:shadow-md',
     ghost:
-      'bg-transparent text-[#0369a1] hover:bg-white/50 focus:ring-[#0369a1]',
+      'bg-transparent text-[#0369a1] dark:text-[#7dd3fc] hover:bg-white/50 dark:hover:bg-slate-800/50 focus:ring-[#0369a1] dark:focus:ring-[#7dd3fc]',
   };
 
   const sizes = {

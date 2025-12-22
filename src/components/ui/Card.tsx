@@ -14,8 +14,8 @@ export default function Card({
   const baseStyles = 'rounded-xl p-6 transition-all duration-200';
   
   const variants = {
-    default: 'bg-white shadow-md',
-    glass: 'glass',
+    default: 'bg-white dark:bg-slate-800 shadow-md dark:shadow-slate-900/50',
+    glass: 'glass dark:glass',
   };
 
   return (

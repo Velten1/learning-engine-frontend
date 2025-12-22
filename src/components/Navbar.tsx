@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { isAuthenticated, removeAuthToken } from '@/api/config';
 import { AuthService } from '@/services/authService';
+import ThemeToggle from '@/components/ThemeToggle';
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -47,7 +48,7 @@ export default function Navbar() {
   ];
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-40 glass-strong border-b border-white/20">
+    <nav className="fixed top-0 left-0 right-0 z-40 glass-strong border-b border-white/20 dark:border-slate-700/30">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
@@ -55,7 +56,7 @@ export default function Navbar() {
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#0369a1] to-[#0284c7] flex items-center justify-center">
               <span className="text-white font-bold text-sm">LE</span>
             </div>
-            <span className="text-lg font-semibold text-[#0f172a]">
+            <span className="text-lg font-semibold text-[#0f172a] dark:text-[#f1f5f9]">
               Learning Engine
             </span>
           </Link>
@@ -66,12 +67,12 @@ export default function Navbar() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`
+                  className={`
                   px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200
                   ${
                     isActive(item.href)
-                      ? 'bg-[#0369a1]/10 text-[#0369a1]'
-                      : 'text-[#475569] hover:bg-white/50 hover:text-[#0369a1]'
+                      ? 'bg-[#0369a1]/10 dark:bg-[#0369a1]/20 text-[#0369a1] dark:text-[#7dd3fc]'
+                      : 'text-[#475569] dark:text-[#cbd5e1] hover:bg-white/50 dark:hover:bg-slate-800/50 hover:text-[#0369a1] dark:hover:text-[#7dd3fc]'
                   }
                 `}
               >
@@ -82,6 +83,7 @@ export default function Navbar() {
 
           {/* Auth Links */}
           <div className="flex items-center space-x-3">
+            <ThemeToggle />
             {isLoggedIn ? (
               <>
                 <Link
@@ -90,8 +92,8 @@ export default function Navbar() {
                     px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200
                     ${
                       isActive('/profile')
-                        ? 'bg-[#0369a1]/10 text-[#0369a1]'
-                        : 'text-[#475569] hover:bg-white/50 hover:text-[#0369a1]'
+                        ? 'bg-[#0369a1]/10 dark:bg-[#0369a1]/20 text-[#0369a1] dark:text-[#7dd3fc]'
+                        : 'text-[#475569] dark:text-[#cbd5e1] hover:bg-white/50 dark:hover:bg-slate-800/50 hover:text-[#0369a1] dark:hover:text-[#7dd3fc]'
                     }
                   `}
                 >
@@ -99,7 +101,7 @@ export default function Navbar() {
                 </Link>
                 <button
                   onClick={handleLogout}
-                  className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 text-[#475569] hover:bg-white/50 hover:text-[#0369a1]"
+                  className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 text-[#475569] dark:text-[#cbd5e1] hover:bg-white/50 dark:hover:bg-slate-800/50 hover:text-[#0369a1] dark:hover:text-[#7dd3fc]"
                 >
                   Sair
                 </button>
@@ -112,8 +114,8 @@ export default function Navbar() {
                     px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200
                     ${
                       isActive('/login')
-                        ? 'bg-[#0369a1]/10 text-[#0369a1]'
-                        : 'text-[#475569] hover:bg-white/50 hover:text-[#0369a1]'
+                        ? 'bg-[#0369a1]/10 dark:bg-[#0369a1]/20 text-[#0369a1] dark:text-[#7dd3fc]'
+                        : 'text-[#475569] dark:text-[#cbd5e1] hover:bg-white/50 dark:hover:bg-slate-800/50 hover:text-[#0369a1] dark:hover:text-[#7dd3fc]'
                     }
                   `}
                 >

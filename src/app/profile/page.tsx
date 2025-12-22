@@ -112,8 +112,8 @@ export default function ProfilePage() {
         <div className="space-y-6">
           {/* Header */}
           <div className="space-y-3">
-            <h1 className="text-4xl font-bold text-[#0f172a]">Meu Perfil</h1>
-            <p className="text-lg text-[#64748b]">
+            <h1 className="text-4xl font-bold text-[#0f172a] dark:text-[#f1f5f9]">Meu Perfil</h1>
+            <p className="text-lg text-[#64748b] dark:text-[#94a3b8]">
               Gerencie suas informações pessoais
             </p>
           </div>
@@ -163,15 +163,15 @@ export default function ProfilePage() {
               {user && (
                 <div className="pt-4 border-t border-white/20 space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-[#64748b]">ID do usuário:</span>
-                    <span className="text-[#0f172a] font-mono text-xs">
+                    <span className="text-[#64748b] dark:text-[#94a3b8]">ID do usuário:</span>
+                    <span className="text-[#0f172a] dark:text-[#f1f5f9] font-mono text-xs">
                       {user.id}
                     </span>
                   </div>
                   {user.createdAt && (
                     <div className="flex justify-between">
-                      <span className="text-[#64748b]">Membro desde:</span>
-                      <span className="text-[#0f172a]">
+                      <span className="text-[#64748b] dark:text-[#94a3b8]">Membro desde:</span>
+                      <span className="text-[#0f172a] dark:text-[#f1f5f9]">
                         {new Date(user.createdAt).toLocaleDateString('pt-BR', {
                           day: '2-digit',
                           month: 'long',

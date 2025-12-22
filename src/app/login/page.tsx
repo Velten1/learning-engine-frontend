@@ -50,10 +50,10 @@ export default function LoginPage() {
           <Card className="space-y-6">
             {/* Header */}
             <div className="text-center space-y-2">
-              <h1 className="text-3xl font-bold text-[#0f172a]">
+              <h1 className="text-3xl font-bold text-[#0f172a] dark:text-[#f1f5f9]">
                 Bem-vindo de volta
               </h1>
-              <p className="text-[#64748b]">
+              <p className="text-[#64748b] dark:text-[#94a3b8]">
                 Entre na sua conta para continuar aprendendo
               </p>
             </div>
@@ -96,7 +96,7 @@ export default function LoginPage() {
                     className="mr-2 rounded border-[#e2e8f0] text-[#0369a1] focus:ring-[#0369a1]"
                     disabled={isLoading}
                   />
-                  <span className="text-[#64748b]">Lembrar-me</span>
+                  <span className="text-[#64748b] dark:text-[#94a3b8]">Lembrar-me</span>
                 </label>
                 <Link
                   href="#"
@@ -112,7 +112,7 @@ export default function LoginPage() {
             </form>
 
             {/* Footer */}
-            <div className="text-center text-sm text-[#64748b]">
+            <div className="text-center text-sm text-[#64748b] dark:text-[#94a3b8]">
               Não tem uma conta?{' '}
               <Link
                 href="/register"

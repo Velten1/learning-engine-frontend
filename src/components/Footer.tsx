@@ -4,7 +4,7 @@ export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="glass-strong border-t border-white/20 mt-auto">
+    <footer className="glass-strong border-t border-white/20 dark:border-slate-700/30 mt-auto">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           {/* Brand */}
@@ -13,10 +13,10 @@ export default function Footer() {
               <span className="text-white font-bold text-sm">LE</span>
             </div>
             <div>
-              <span className="text-lg font-semibold text-[#0f172a] block">
+              <span className="text-lg font-semibold text-[#0f172a] dark:text-[#f1f5f9] block">
                 Learning Engine
               </span>
-              <p className="text-xs text-[#64748b]">
+              <p className="text-xs text-[#64748b] dark:text-[#94a3b8]">
                 Plataforma focada em aprendizado profundo
               </p>
             </div>
@@ -28,11 +28,11 @@ export default function Footer() {
               href="https://github.com/Velten1"
               target="_blank"
               rel="noopener noreferrer"
-              className="w-10 h-10 rounded-lg bg-white/50 hover:bg-white/70 flex items-center justify-center transition-all duration-200 hover:scale-110"
+              className="w-10 h-10 rounded-lg bg-white/50 dark:bg-slate-800/50 hover:bg-white/70 dark:hover:bg-slate-800/70 flex items-center justify-center transition-all duration-200 hover:scale-110"
               aria-label="GitHub"
             >
               <svg
-                className="w-5 h-5 text-[#0369a1]"
+                className="w-5 h-5 text-[#0369a1] dark:text-[#7dd3fc]"
                 fill="currentColor"
                 viewBox="0 0 24 24"
               >
@@ -47,11 +47,11 @@ export default function Footer() {
               href="https://www.linkedin.com/in/caio-velten-1351b22b7/"
               target="_blank"
               rel="noopener noreferrer"
-              className="w-10 h-10 rounded-lg bg-white/50 hover:bg-white/70 flex items-center justify-center transition-all duration-200 hover:scale-110"
+              className="w-10 h-10 rounded-lg bg-white/50 dark:bg-slate-800/50 hover:bg-white/70 dark:hover:bg-slate-800/70 flex items-center justify-center transition-all duration-200 hover:scale-110"
               aria-label="LinkedIn"
             >
               <svg
-                className="w-5 h-5 text-[#0369a1]"
+                className="w-5 h-5 text-[#0369a1] dark:text-[#7dd3fc]"
                 fill="currentColor"
                 viewBox="0 0 24 24"
               >
@@ -62,8 +62,8 @@ export default function Footer() {
         </div>
 
         {/* Copyright */}
-        <div className="mt-8 pt-6 border-t border-white/20 text-center">
-          <p className="text-sm text-[#94a3b8]">
+        <div className="mt-8 pt-6 border-t border-white/20 dark:border-slate-700/30 text-center">
+          <p className="text-sm text-[#94a3b8] dark:text-slate-500">
             © {currentYear} Desenvolvido por Caio Velten. Todos os direitos reservados.
           </p>
         </div>

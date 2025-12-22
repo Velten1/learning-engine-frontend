@@ -66,7 +66,7 @@ export default function HistoryList() {
       {/* Loading State */}
       {isLoading && (
         <div className="text-center py-12">
-          <p className="text-[#64748b]">Carregando reflexões...</p>
+          <p className="text-[#64748b] dark:text-[#94a3b8]">Carregando reflexões...</p>
         </div>
       )}
 
@@ -79,14 +79,14 @@ export default function HistoryList() {
                 {/* Header */}
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-[#0f172a] mb-1">
+                    <h3 className="text-lg font-semibold text-[#0f172a] dark:text-[#f1f5f9] mb-1">
                       {reflection.topic}
                     </h3>
-                    <p className="text-sm text-[#64748b]">
+                    <p className="text-sm text-[#64748b] dark:text-[#94a3b8]">
                       {formatDate(reflection.createdAt)}
                     </p>
                   </div>
-                  <div className="flex items-center gap-1 text-sm text-[#0369a1] bg-[#0369a1]/10 px-3 py-1 rounded-full">
+                  <div className="flex items-center gap-1 text-sm text-[#0369a1] dark:text-[#7dd3fc] bg-[#0369a1]/10 dark:bg-[#7dd3fc]/20 px-3 py-1 rounded-full">
                     <svg
                       className="w-4 h-4"
                       fill="none"
@@ -105,13 +105,13 @@ export default function HistoryList() {
                 </div>
 
                 {/* Summary */}
-                <p className="text-[#475569] leading-relaxed">
+                <p className="text-[#475569] dark:text-[#cbd5e1] leading-relaxed">
                   {reflection.summary}
                 </p>
 
                 {/* Actions */}
-                <div className="flex items-center gap-3 pt-2 border-t border-white/20">
-                  <button className="text-sm text-[#0369a1] hover:text-[#0284c7] transition-colors">
+                <div className="flex items-center gap-3 pt-2 border-t border-white/20 dark:border-slate-700/30">
+                  <button className="text-sm text-[#0369a1] dark:text-[#7dd3fc] hover:text-[#0284c7] dark:hover:text-[#bae6fd] transition-colors">
                     Ver detalhes
                   </button>
                 </div>
@@ -126,7 +126,7 @@ export default function HistoryList() {
         <Card className="text-center py-12">
           <div className="space-y-3">
             <svg
-              className="w-16 h-16 mx-auto text-[#94a3b8]"
+              className="w-16 h-16 mx-auto text-[#94a3b8] dark:text-slate-600"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -138,8 +138,8 @@ export default function HistoryList() {
                 d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
               />
             </svg>
-            <p className="text-[#64748b]">Nenhuma reflexão encontrada</p>
-            <p className="text-sm text-[#94a3b8]">
+            <p className="text-[#64748b] dark:text-[#94a3b8]">Nenhuma reflexão encontrada</p>
+            <p className="text-sm text-[#94a3b8] dark:text-slate-500">
               Comece uma sessão de estudo para criar sua primeira reflexão
             </p>
           </div>

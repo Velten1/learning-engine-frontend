@@ -61,10 +61,10 @@ export default function RegisterPage() {
           <Card className="space-y-6">
             {/* Header */}
             <div className="text-center space-y-2">
-              <h1 className="text-3xl font-bold text-[#0f172a]">
+              <h1 className="text-3xl font-bold text-[#0f172a] dark:text-[#f1f5f9]">
                 Criar conta
               </h1>
-              <p className="text-[#64748b]">
+              <p className="text-[#64748b] dark:text-[#94a3b8]">
                 Comece sua jornada de aprendizado hoje
               </p>
             </div>
@@ -111,7 +111,7 @@ export default function RegisterPage() {
                 disabled={isLoading}
               />
 
-              <div className="text-sm text-[#64748b]">
+              <div className="text-sm text-[#64748b] dark:text-[#94a3b8]">
                 Ao criar uma conta, você concorda com nossos{' '}
                 <Link href="#" className="text-[#0369a1] hover:underline">
                   Termos de Serviço

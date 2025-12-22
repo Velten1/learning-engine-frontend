@@ -91,10 +91,10 @@ export default function ReflectionForm({ pomodoroSessionId }: ReflectionFormProp
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Header */}
         <div className="space-y-2">
-          <h2 className="text-2xl font-bold text-[#0f172a]">
+          <h2 className="text-2xl font-bold text-[#0f172a] dark:text-[#f1f5f9]">
             Reflexão sobre o aprendizado
           </h2>
-          <p className="text-[#64748b]">
+          <p className="text-[#64748b] dark:text-[#94a3b8]">
             Registre seus pensamentos e insights sobre o que você estudou
           </p>
         </div>

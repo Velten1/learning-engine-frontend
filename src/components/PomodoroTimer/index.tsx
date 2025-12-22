@@ -151,10 +151,10 @@ export default function PomodoroTimer() {
       <Card className="text-center space-y-8">
         {/* Timer Display */}
         <div className="space-y-4">
-          <div className="text-7xl md:text-8xl font-light text-[#0369a1] tracking-tight">
+          <div className="text-7xl md:text-8xl font-light text-[#0369a1] dark:text-[#7dd3fc] tracking-tight">
             {formatTime(time)}
           </div>
-          <p className="text-[#64748b] text-lg">
+          <p className="text-[#64748b] dark:text-[#94a3b8] text-lg">
             {isRunning ? 'Foco profundo' : 'Pronto para começar'}
           </p>
         </div>
