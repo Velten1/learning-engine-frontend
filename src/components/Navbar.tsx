@@ -59,7 +59,7 @@ export default function Navbar() {
 
   const navItems = [
     { href: '/', label: 'Pomodoro' },
-    { href: '/dashboard', label: 'Histórico' },
+    { href: '/history', label: 'Histórico' },
     { href: '/revisoes', label: 'Revisões' },
   ];
 

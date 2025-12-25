@@ -122,7 +122,7 @@ export default function ReflectionForm({
           onSuccess();
         } else {
           // Caso contrário, redirecionar (comportamento padrão)
-        router.push('/dashboard');
+                router.push('/history');
         }
       } else {
         setError(result.error || 'Erro ao salvar reflexão');

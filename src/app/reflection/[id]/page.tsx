@@ -44,7 +44,7 @@ export default function ReflectionDetailPage() {
 
     const result = await ReflectionService.delete(reflection.id);
     if (result.success) {
-      router.push('/dashboard');
+      router.push('/history');
     } else {
       setError(result.error || 'Erro ao deletar reflexão');
     }
@@ -86,7 +86,7 @@ export default function ReflectionDetailPage() {
             <p className="text-red-600 dark:text-red-400">{error}</p>
             <Button
               variant="secondary"
-              onClick={() => router.push('/dashboard')}
+              onClick={() => router.push('/history')}
               className="mt-4"
             >
               Voltar
@@ -235,7 +235,7 @@ export default function ReflectionDetailPage() {
 
           {/* Back Button */}
           <div className="flex justify-start">
-            <Button variant="secondary" onClick={() => router.push('/dashboard')}>
+            <Button variant="secondary" onClick={() => router.push('/history')}>
               Voltar para histórico
             </Button>
           </div>
