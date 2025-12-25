@@ -2,7 +2,7 @@ import { apiRequest } from './config';
 
 export interface Reflection {
   id: string;
-  pomodoroSessionId: string;
+  pomodoroId: string;
   userId: string;
   topic: string;
   whatIThought: string;
@@ -15,13 +15,22 @@ export interface Reflection {
 }
 
 export interface CreateReflectionData {
-  pomodoroSessionId: string;
+  pomodoroId: string;
   topic: string;
   whatIThought: string;
   whatItActuallyIs: string;
   summary: string;
   mandatoryQuestion: string;
-  optionalQuestion?: string;
+  optionalQuestion?: string | null;
+}
+
+export interface UpdateReflectionData {
+  topic?: string;
+  whatIThought?: string;
+  whatItActuallyIs?: string;
+  summary?: string;
+  mandatoryQuestion?: string;
+  optionalQuestion?: string | null;
 }
 
 // Criar uma reflexão
@@ -41,10 +50,37 @@ export async function getReflection(id: string): Promise<Reflection> {
   });
 }
 
+// Obter reflexão por pomodoroId
+export async function getReflectionByPomodoroId(
+  pomodoroId: string
+): Promise<Reflection> {
+  return apiRequest<Reflection>(`/api/reflections/pomodoro/${pomodoroId}`, {
+    method: 'GET',
+  });
+}
+
 // Listar todas as reflexões do usuário
 export async function getReflections(): Promise<Reflection[]> {
-  return apiRequest<Reflection[]>('/api/reflections', {
+  return apiRequest<Reflection[]>('/api/reflections/user/all', {
     method: 'GET',
+  });
+}
+
+// Atualizar uma reflexão
+export async function updateReflection(
+  id: string,
+  data: UpdateReflectionData
+): Promise<Reflection> {
+  return apiRequest<Reflection>(`/api/reflections/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+}
+
+// Deletar uma reflexão
+export async function deleteReflection(id: string): Promise<void> {
+  return apiRequest<void>(`/api/reflections/${id}`, {
+    method: 'DELETE',
   });
 }
 

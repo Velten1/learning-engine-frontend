@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import Card from '@/components/ui/Card';
 import SearchInput from '@/components/ui/SearchInput';
 import { ReflectionService } from '@/services/reflectionService';
@@ -77,31 +78,13 @@ export default function HistoryList() {
             <Card key={reflection.id} className="hover:shadow-lg transition-shadow">
               <div className="space-y-3">
                 {/* Header */}
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
+                <div>
                     <h3 className="text-lg font-semibold text-[#0f172a] dark:text-[#f1f5f9] mb-1">
                       {reflection.topic}
                     </h3>
                     <p className="text-sm text-[#64748b] dark:text-[#94a3b8]">
                       {formatDate(reflection.createdAt)}
                     </p>
-                  </div>
-                  <div className="flex items-center gap-1 text-sm text-[#0369a1] dark:text-[#7dd3fc] bg-[#0369a1]/10 dark:bg-[#7dd3fc]/20 px-3 py-1 rounded-full">
-                    <svg
-                      className="w-4 h-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
-                    <span>25min</span>
-                  </div>
                 </div>
 
                 {/* Summary */}
@@ -111,9 +94,12 @@ export default function HistoryList() {
 
                 {/* Actions */}
                 <div className="flex items-center gap-3 pt-2 border-t border-white/20 dark:border-slate-700/30">
-                  <button className="text-sm text-[#0369a1] dark:text-[#7dd3fc] hover:text-[#0284c7] dark:hover:text-[#bae6fd] transition-colors">
+                  <Link
+                    href={`/reflection/${reflection.id}`}
+                    className="text-sm text-[#0369a1] dark:text-[#7dd3fc] hover:text-[#0284c7] dark:hover:text-[#bae6fd] transition-colors"
+                  >
                     Ver detalhes
-                  </button>
+                  </Link>
                 </div>
               </div>
             </Card>

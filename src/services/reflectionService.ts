@@ -1,5 +1,9 @@
 import * as reflectionApi from '@/api/reflection';
-import type { CreateReflectionData, Reflection } from '@/api/reflection';
+import type {
+  CreateReflectionData,
+  UpdateReflectionData,
+  Reflection,
+} from '@/api/reflection';
 
 export class ReflectionService {
   static async create(data: CreateReflectionData) {
@@ -38,6 +42,26 @@ export class ReflectionService {
     }
   }
 
+  static async getByPomodoroId(pomodoroId: string) {
+    try {
+      const reflection = await reflectionApi.getReflectionByPomodoroId(
+        pomodoroId
+      );
+      return {
+        success: true,
+        data: reflection,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Erro ao obter reflexão',
+      };
+    }
+  }
+
   static async getAll(): Promise<Reflection[]> {
     try {
       const reflections = await reflectionApi.getReflections();
@@ -45,6 +69,41 @@ export class ReflectionService {
     } catch (error) {
       console.error('Erro ao obter reflexões:', error);
       return [];
+    }
+  }
+
+  static async update(id: string, data: UpdateReflectionData) {
+    try {
+      const reflection = await reflectionApi.updateReflection(id, data);
+      return {
+        success: true,
+        data: reflection,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Erro ao atualizar reflexão',
+      };
+    }
+  }
+
+  static async delete(id: string) {
+    try {
+      await reflectionApi.deleteReflection(id);
+      return {
+        success: true,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Erro ao deletar reflexão',
+      };
     }
   }
 }

@@ -34,8 +34,19 @@ export class AuthService {
     }
   }
 
-  static logout() {
-    authApi.logout();
+  static async logout() {
+    try {
+      await authApi.logout();
+      return {
+        success: true,
+        message: 'Logout realizado com sucesso',
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Erro ao fazer logout',
+      };
+    }
   }
 
   static async getProfile() {

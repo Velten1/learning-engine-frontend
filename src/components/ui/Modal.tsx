@@ -22,7 +22,7 @@ export default function Modal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
       onClick={onClose}
     >
       {/* Backdrop */}
@@ -34,8 +34,8 @@ export default function Modal({
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="px-6 py-4 border-b border-white/20">
-          <h2 className="text-xl font-semibold text-[#0f172a]">{title}</h2>
+        <div className="px-6 py-4 border-b border-white/20 dark:border-slate-700/30">
+          <h2 className="text-xl font-semibold text-[#0f172a] dark:text-[#f1f5f9]">{title}</h2>
         </div>
 
         {/* Body */}

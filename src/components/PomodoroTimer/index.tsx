@@ -8,6 +8,7 @@ import Textarea from '@/components/ui/Textarea';
 import { PomodoroService } from '@/services/pomodoroService';
 import type { CurrentPomodoroResponse } from '@/api/pomodoro';
 import { isAuthenticated } from '@/api/config';
+import ReflectionModal from '@/components/ReflectionModal';
 
 export default function PomodoroTimer() {
   const [currentPomodoro, setCurrentPomodoro] =
@@ -15,6 +16,8 @@ export default function PomodoroTimer() {
   const [time, setTime] = useState(20 * 60); // 20 minutos em segundos
   const [showAbandonModal, setShowAbandonModal] = useState(false);
   const [showResetModal, setShowResetModal] = useState(false);
+  const [showReflectionModal, setShowReflectionModal] = useState(false);
+  const [completedPomodoroId, setCompletedPomodoroId] = useState<string | null>(null);
   const [abandonReason, setAbandonReason] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -55,9 +58,12 @@ export default function PomodoroTimer() {
 
       setTime(remainingSeconds);
 
-      // Se o tempo acabou, verificar se foi completado
+      // Se o tempo acabou, parar o timer e não recarregar automaticamente
+      // O usuário deve clicar no botão "Completar" manualmente
       if (remainingSeconds === 0) {
-        loadCurrentPomodoro();
+        clearInterval(interval);
+        // Não chamar loadCurrentPomodoro() aqui para evitar que o timer continue
+        // O botão "Completar" já está visível quando time === 0
       }
     }, 1000);
 
@@ -181,16 +187,31 @@ export default function PomodoroTimer() {
 
     const result = await PomodoroService.complete();
 
-    if (result.success) {
+    if (result.success && result.data) {
+      // Salvar o ID do pomodoro completado
+      const pomodoroId = result.data.id;
+      setCompletedPomodoroId(pomodoroId);
       setTime(20 * 60);
       setCurrentPomodoro(null);
       await loadCurrentPomodoro();
-      // Redirecionar para página de reflexão ou mostrar sucesso
+      // Abrir modal de reflection
+      setShowReflectionModal(true);
     } else {
       setError(result.error || 'Erro ao completar pomodoro');
     }
 
     setIsLoading(false);
+  };
+
+  const handleReflectionModalClose = () => {
+    setShowReflectionModal(false);
+    setCompletedPomodoroId(null);
+  };
+
+  const handleReflectionSuccess = () => {
+    setShowReflectionModal(false);
+    setCompletedPomodoroId(null);
+    // Opcional: mostrar mensagem de sucesso ou atualizar estado
   };
 
   return (
@@ -372,6 +393,16 @@ export default function PomodoroTimer() {
           </p>
         </div>
       </Modal>
+
+      {/* Reflection Modal */}
+      {completedPomodoroId && (
+        <ReflectionModal
+          isOpen={showReflectionModal}
+          onClose={handleReflectionModalClose}
+          pomodoroId={completedPomodoroId}
+          onSuccess={handleReflectionSuccess}
+        />
+      )}
     </>
   );
 }

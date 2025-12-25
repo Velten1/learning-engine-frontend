@@ -1,18 +1,23 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { isAuthenticated, removeAuthToken } from '@/api/config';
 import { AuthService } from '@/services/authService';
 import ThemeToggle from '@/components/ThemeToggle';
+import LogoutModal from '@/components/LogoutModal';
 
 export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     setIsLoggedIn(isAuthenticated());
     
     // Listener para atualizar quando o storage mudar (login/logout em outra aba)
@@ -35,16 +40,27 @@ export default function Navbar() {
 
   const isActive = (path: string) => pathname === path;
 
-  const handleLogout = () => {
-    AuthService.logout();
+  const handleLogoutClick = () => {
+    setShowLogoutModal(true);
+  };
+
+  const handleConfirmLogout = async () => {
+    setShowLogoutModal(false);
+    const result = await AuthService.logout();
+    if (result.success) {
     setIsLoggedIn(false);
     router.push('/');
+    }
+  };
+
+  const handleCancelLogout = () => {
+    setShowLogoutModal(false);
   };
 
   const navItems = [
     { href: '/', label: 'Pomodoro' },
     { href: '/dashboard', label: 'Histórico' },
-    { href: '/reflection', label: 'Estudo' },
+    { href: '/revisoes', label: 'Revisões' },
   ];
 
   return (
@@ -100,7 +116,7 @@ export default function Navbar() {
                   Perfil
                 </Link>
                 <button
-                  onClick={handleLogout}
+                  onClick={handleLogoutClick}
                   className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 text-[#475569] dark:text-[#cbd5e1] hover:bg-white/50 dark:hover:bg-slate-800/50 hover:text-[#0369a1] dark:hover:text-[#7dd3fc]"
                 >
                   Sair
@@ -139,6 +155,16 @@ export default function Navbar() {
           </div>
         </div>
       </div>
+      
+      {/* Logout Confirmation Modal - renderizado via portal para aparecer acima de tudo */}
+      {mounted && typeof window !== 'undefined' && createPortal(
+        <LogoutModal
+          isOpen={showLogoutModal}
+          onClose={handleCancelLogout}
+          onConfirm={handleConfirmLogout}
+        />,
+        document.body
+      )}
     </nav>
   );
 }

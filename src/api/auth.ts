@@ -53,8 +53,19 @@ export async function login(data: LoginData): Promise<AuthResponse> {
 }
 
 // Fazer logout
-export function logout(): void {
+export async function logout(): Promise<void> {
+  try {
+    // Chamar API para limpar cookie no backend
+    await apiRequest('/api/auth/logout', {
+      method: 'POST',
+    });
+  } catch (error) {
+    // Mesmo se houver erro na API, remover token do localStorage
+    console.error('Erro ao fazer logout na API:', error);
+  } finally {
+    // Sempre remover token do localStorage
   removeAuthToken();
+  }
 }
 
 export interface User {
@@ -86,5 +97,26 @@ export async function updateUserProfile(
     method: 'PUT',
     body: JSON.stringify(data),
   });
+}
+
+export interface RenewTokenResponse {
+  status: number;
+  data?: {
+    token: string;
+  };
+  message?: string;
+}
+
+// Renovar token
+export async function renewToken(): Promise<RenewTokenResponse> {
+  const response = await apiRequest<RenewTokenResponse>('/api/auth/renew-token', {
+    method: 'POST',
+  });
+
+  if (response.data?.token) {
+    setAuthToken(response.data.token);
+  }
+
+  return response;
 }
 

@@ -10,22 +10,47 @@ import { ReflectionService } from '@/services/reflectionService';
 import { PomodoroService } from '@/services/pomodoroService';
 
 interface ReflectionFormProps {
-  pomodoroSessionId?: string;
+  pomodoroId?: string;
+  reflectionId?: string;
+  initialData?: {
+    topic?: string;
+    whatIThought?: string;
+    whatItActuallyIs?: string;
+    summary?: string;
+    mandatoryQuestion?: string;
+    optionalQuestion?: string | null;
+  };
+  onSuccess?: () => void;
+  onCancel?: () => void;
+  showCancelButton?: boolean;
+  showCard?: boolean;
+  showHeader?: boolean;
 }
 
-export default function ReflectionForm({ pomodoroSessionId }: ReflectionFormProps) {
+export default function ReflectionForm({
+  pomodoroId: propPomodoroId,
+  reflectionId,
+  initialData,
+  onSuccess,
+  onCancel,
+  showCancelButton = true,
+  showCard = true,
+  showHeader = true,
+}: ReflectionFormProps) {
   const router = useRouter();
   const [formData, setFormData] = useState({
-    topic: '',
-    whatIThought: '',
-    whatItActuallyIs: '',
-    summary: '',
-    mandatoryQuestion: '',
-    optionalQuestion: '',
+    topic: initialData?.topic || '',
+    whatIThought: initialData?.whatIThought || '',
+    whatItActuallyIs: initialData?.whatItActuallyIs || '',
+    summary: initialData?.summary || '',
+    mandatoryQuestion: initialData?.mandatoryQuestion || '',
+    optionalQuestion: initialData?.optionalQuestion || '',
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [pomodoroId, setPomodoroId] = useState<string | null>(pomodoroSessionId || null);
+  const [pomodoroId, setPomodoroId] = useState<string | null>(
+    propPomodoroId || null
+  );
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -42,7 +67,7 @@ export default function ReflectionForm({ pomodoroSessionId }: ReflectionFormProp
     setIsLoading(true);
 
     try {
-      // Se não tiver pomodoroSessionId, tentar buscar o último completado
+      // Se não tiver pomodoroId, tentar buscar o último completado
       let sessionId = pomodoroId;
       
       if (!sessionId) {
@@ -51,31 +76,54 @@ export default function ReflectionForm({ pomodoroSessionId }: ReflectionFormProp
         if (currentPomodoro && currentPomodoro.status === 'COMPLETED') {
           sessionId = currentPomodoro.id;
         } else {
-          setError('Nenhuma sessão de Pomodoro completada encontrada. Complete uma sessão primeiro.');
+          setError(
+            'Nenhuma sessão de Pomodoro completada encontrada. Complete uma sessão primeiro.'
+          );
           setIsLoading(false);
           return;
         }
       }
 
       if (!sessionId) {
-        setError('É necessário ter uma sessão de Pomodoro completada para criar uma reflexão.');
+        setError(
+          'É necessário ter uma sessão de Pomodoro completada para criar uma reflexão.'
+        );
         setIsLoading(false);
         return;
       }
 
-      const result = await ReflectionService.create({
-        pomodoroSessionId: sessionId,
+      let result;
+      
+      // Se tiver reflectionId, atualizar; caso contrário, criar
+      if (reflectionId) {
+        result = await ReflectionService.update(reflectionId, {
+          topic: formData.topic,
+          whatIThought: formData.whatIThought,
+          whatItActuallyIs: formData.whatItActuallyIs,
+          summary: formData.summary,
+          mandatoryQuestion: formData.mandatoryQuestion,
+          optionalQuestion: formData.optionalQuestion || null,
+        });
+      } else {
+        result = await ReflectionService.create({
+          pomodoroId: sessionId,
         topic: formData.topic,
         whatIThought: formData.whatIThought,
         whatItActuallyIs: formData.whatItActuallyIs,
         summary: formData.summary,
         mandatoryQuestion: formData.mandatoryQuestion,
-        optionalQuestion: formData.optionalQuestion || undefined,
+          optionalQuestion: formData.optionalQuestion || null,
       });
+      }
 
       if (result.success) {
-        // Redirecionar para histórico ou página de sucesso
+        // Se tiver callback onSuccess, chamar (usado em modal)
+        if (onSuccess) {
+          onSuccess();
+        } else {
+          // Caso contrário, redirecionar (comportamento padrão)
         router.push('/dashboard');
+        }
       } else {
         setError(result.error || 'Erro ao salvar reflexão');
       }
@@ -86,10 +134,18 @@ export default function ReflectionForm({ pomodoroSessionId }: ReflectionFormProp
     }
   };
 
-  return (
-    <Card>
+  const handleCancel = () => {
+    if (onCancel) {
+      onCancel();
+    } else {
+      router.back();
+    }
+  };
+
+  const formContent = (
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Header */}
+      {showHeader && (
         <div className="space-y-2">
           <h2 className="text-2xl font-bold text-[#0f172a] dark:text-[#f1f5f9]">
             Reflexão sobre o aprendizado
@@ -98,6 +154,7 @@ export default function ReflectionForm({ pomodoroSessionId }: ReflectionFormProp
             Registre seus pensamentos e insights sobre o que você estudou
           </p>
         </div>
+      )}
 
         {/* Topic */}
         <Input
@@ -173,19 +230,26 @@ export default function ReflectionForm({ pomodoroSessionId }: ReflectionFormProp
 
         {/* Actions */}
         <div className="flex justify-end gap-3 pt-4">
+        {showCancelButton && (
           <Button
             type="button"
             variant="secondary"
-            onClick={() => router.back()}
+            onClick={handleCancel}
             disabled={isLoading}
           >
             Cancelar
           </Button>
+        )}
           <Button type="submit" size="lg" disabled={isLoading}>
             {isLoading ? 'Salvando...' : 'Salvar reflexão'}
           </Button>
         </div>
       </form>
-    </Card>
   );
+
+  if (showCard) {
+    return <Card>{formContent}</Card>;
+  }
+
+  return formContent;
 }
