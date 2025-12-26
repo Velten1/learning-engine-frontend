@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Card from '@/components/ui/Card';
 import Input from '@/components/ui/Input';
@@ -8,6 +8,7 @@ import Textarea from '@/components/ui/Textarea';
 import Button from '@/components/ui/Button';
 import { ReflectionService } from '@/services/reflectionService';
 import { PomodoroService } from '@/services/pomodoroService';
+import { QuestionService } from '@/services/questionService';
 
 interface ReflectionFormProps {
   pomodoroId?: string;
@@ -51,6 +52,30 @@ export default function ReflectionForm({
   const [pomodoroId, setPomodoroId] = useState<string | null>(
     propPomodoroId || null
   );
+  const [randomQuestion, setRandomQuestion] = useState<string>('');
+  const [isLoadingQuestion, setIsLoadingQuestion] = useState(false);
+
+  // Buscar pergunta aleatória quando componente monta e pomodoroId está disponível
+  useEffect(() => {
+    const fetchRandomQuestion = async () => {
+      // Só busca se pomodoroId estiver disponível e não houver initialData.optionalQuestion
+      if (pomodoroId && !initialData?.optionalQuestion) {
+        setIsLoadingQuestion(true);
+        try {
+          const question = await QuestionService.getRandom();
+          if (question) {
+            setRandomQuestion(question.text);
+          }
+        } catch (error) {
+          console.error('Erro ao buscar pergunta aleatória:', error);
+        } finally {
+          setIsLoadingQuestion(false);
+        }
+      }
+    };
+
+    fetchRandomQuestion();
+  }, [pomodoroId, initialData?.optionalQuestion]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -205,7 +230,7 @@ export default function ReflectionForm({
           type="text"
           name="mandatoryQuestion"
           label="Explique como se estivesse explicando para um iniciante"
-          placeholder="Explique como se estivesse explicando para um iniciante"
+          placeholder="Explique da forma que preferir, mas que um iniciante possa entender"
           value={formData.mandatoryQuestion}
           onChange={handleChange}
           required
@@ -215,8 +240,16 @@ export default function ReflectionForm({
         <Input
           type="text"
           name="optionalQuestion"
-          label="armazenar aqui uma row de questoes que aparecem aleatoriamente, como umas 200 questoes"
-          placeholder="Armazenar aqui uma row de questoes que aparecem aleatoriamente, como umas 200 questoes"
+          label={
+            isLoadingQuestion
+              ? 'Carregando pergunta...'
+              : randomQuestion || 'Pergunta opcional'
+          }
+          placeholder={
+            isLoadingQuestion
+              ? 'Carregando pergunta...'
+              : randomQuestion || 'Responda a pergunta acima'
+          }
           value={formData.optionalQuestion}
           onChange={handleChange}
         />

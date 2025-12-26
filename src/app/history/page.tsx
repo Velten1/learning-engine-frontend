@@ -73,7 +73,7 @@ export default function HistoryPage() {
                     : HistoryService.formatTime(todayStats.focusedTimeToday)}
                 </div>
                 <div className="text-sm text-[#64748b] dark:text-[#94a3b8] mt-1">
-                  Tempo focado
+                  Tempo focado hoje
                 </div>
               </div>
               <div className="glass rounded-xl p-4">
@@ -81,7 +81,7 @@ export default function HistoryPage() {
                   {isLoading ? '...' : todayStats.reflectionsToday}
                 </div>
                 <div className="text-sm text-[#64748b] dark:text-[#94a3b8] mt-1">
-                  Reflexões
+                  Reflexões hoje
                 </div>
               </div>
             </div>
@@ -116,7 +116,7 @@ export default function HistoryPage() {
                   {isLoading ? '...' : lifetimeStats.thisWeekSessions}
                 </div>
                 <div className="text-sm text-[#64748b] dark:text-[#94a3b8] mt-1">
-                  Esta semana
+                  Pomodoros esta semana
                 </div>
               </div>
               <div className="glass rounded-xl p-4">
@@ -124,7 +124,7 @@ export default function HistoryPage() {
                   {isLoading ? '...' : lifetimeStats.topicsStudied}
                 </div>
                 <div className="text-sm text-[#64748b] dark:text-[#94a3b8] mt-1">
-                  Tópicos únicos
+                  Tópicos estudados
                 </div>
               </div>
             </div>

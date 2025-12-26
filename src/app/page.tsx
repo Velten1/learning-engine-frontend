@@ -58,13 +58,13 @@ export default function Home() {
               <div className="text-2xl font-bold text-[#0369a1] dark:text-[#7dd3fc]">
                 {isLoading ? '...' : HistoryService.formatTime(todayStats.focusedTimeToday)}
               </div>
-              <div className="text-sm text-[#64748b] dark:text-[#94a3b8] mt-1">Tempo focado</div>
+              <div className="text-sm text-[#64748b] dark:text-[#94a3b8] mt-1">Tempo focado hoje</div>
             </div>
             <div className="glass rounded-xl p-4 text-center">
               <div className="text-2xl font-bold text-[#0369a1] dark:text-[#7dd3fc]">
                 {isLoading ? '...' : todayStats.reflectionsToday}
               </div>
-              <div className="text-sm text-[#64748b] dark:text-[#94a3b8] mt-1">Reflexões</div>
+              <div className="text-sm text-[#64748b] dark:text-[#94a3b8] mt-1">Reflexões hoje</div>
             </div>
           </div>
         </div>
