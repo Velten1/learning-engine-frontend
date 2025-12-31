@@ -55,7 +55,7 @@ export default function RegisterPage() {
   };
 
   return (
-    <Layout showNavbar={false}>
+    <Layout>
       <div className="min-h-screen flex items-center justify-center px-4 py-12">
         <div className="w-full max-w-md fade-in">
           <Card className="space-y-6">

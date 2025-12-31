@@ -30,4 +30,13 @@ export interface Reflection {
   updatedAt: Date
 }
 
+export interface Deck {
+  id: string
+  userId: string
+  name: string
+  description: string | null
+  createdAt: string
+  updatedAt: string
+}
+
 

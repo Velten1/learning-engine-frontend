@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Layout from '@/components/Layout';
 import HistoryList from '@/components/HistoryList';
 import { HistoryService } from '@/services/historyService';
 
@@ -39,8 +40,9 @@ export default function HistoryPage() {
   };
 
   return (
-    <div className="min-h-screen px-4 py-12">
-      <div className="max-w-4xl mx-auto fade-in">
+    <Layout>
+      <div className="min-h-screen px-4 py-12">
+        <div className="max-w-4xl mx-auto fade-in">
         <div className="space-y-8">
           {/* Header */}
           <div className="space-y-3">
@@ -133,7 +135,8 @@ export default function HistoryPage() {
           {/* History List */}
           <HistoryList />
         </div>
+        </div>
       </div>
-    </div>
+    </Layout>
   );
 }

@@ -1,5 +1,4 @@
 import './globals.css';
-import Layout from '@/components/Layout';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 
 export default function RootLayout({
@@ -11,7 +10,7 @@ export default function RootLayout({
     <html lang="pt-BR" suppressHydrationWarning>
       <body>
         <ThemeProvider>
-          <Layout>{children}</Layout>
+          {children}
         </ThemeProvider>
       </body>
     </html>

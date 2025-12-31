@@ -1,35 +1,146 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Layout from '@/components/Layout';
 import { ReflectionService } from '@/services/reflectionService';
+import { DeckService } from '@/services/deckService';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
+import Modal from '@/components/ui/Modal';
+import Input from '@/components/ui/Input';
+import Textarea from '@/components/ui/Textarea';
 import type { Reflection } from '@/api/reflection';
+import type { Deck } from '@/api/deck';
 import Link from 'next/link';
 
+type TabType = 'reflections' | 'decks';
+
 export default function RevisoesPage() {
+  const [activeTab, setActiveTab] = useState<TabType>('decks');
+  
+  // Reflections state
   const [reflections, setReflections] = useState<Reflection[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingReflections, setIsLoadingReflections] = useState(false);
+  
+  // Decks state
+  const [decks, setDecks] = useState<Deck[]>([]);
+  const [isLoadingDecks, setIsLoadingDecks] = useState(false);
+  
+  // Modal state
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingDeck, setEditingDeck] = useState<Deck | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    description: '',
+  });
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    loadReflections();
-  }, []);
+    if (activeTab === 'reflections') {
+      loadReflections();
+    } else {
+      loadDecks();
+    }
+  }, [activeTab]);
 
+  // Load reflections
   const loadReflections = async () => {
-    setIsLoading(true);
-    setError(null);
+    setIsLoadingReflections(true);
     try {
-      const result = await ReflectionService.getAll();
+      const reflections = await ReflectionService.getAll();
+      setReflections(reflections);
+    } catch (err) {
+      console.error('Erro ao carregar revisões:', err);
+      setReflections([]);
+    } finally {
+      setIsLoadingReflections(false);
+    }
+  };
+
+  // Load decks
+  const loadDecks = async () => {
+    setIsLoadingDecks(true);
+    try {
+      const result = await DeckService.getAll();
       if (result.success && result.data) {
-        setReflections(result.data);
-      } else {
-        setError(result.error || 'Erro ao carregar revisões');
+        setDecks(result.data);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao carregar revisões');
+      console.error('Erro ao carregar decks:', err);
     } finally {
-      setIsLoading(false);
+      setIsLoadingDecks(false);
+    }
+  };
+
+  // Deck modal handlers
+  const handleOpenModal = (deck?: Deck) => {
+    if (deck) {
+      setEditingDeck(deck);
+      setFormData({
+        name: deck.name,
+        description: deck.description || '',
+      });
+    } else {
+      setEditingDeck(null);
+      setFormData({ name: '', description: '' });
+    }
+    setError(null);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setEditingDeck(null);
+    setFormData({ name: '', description: '' });
+    setError(null);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setIsSubmitting(true);
+
+    try {
+      const data = {
+        name: formData.name.trim(),
+        description: formData.description.trim() || null,
+      };
+
+      let result;
+      if (editingDeck) {
+        result = await DeckService.update(editingDeck.id, data);
+      } else {
+        result = await DeckService.create(data);
+      }
+
+      if (result.success) {
+        handleCloseModal();
+        loadDecks();
+      } else {
+        setError(result.error || 'Erro ao salvar deck');
+      }
+    } catch (error) {
+      setError('Erro ao salvar deck');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Tem certeza que deseja deletar este deck? Esta ação não pode ser desfeita.')) {
+      return;
+    }
+
+    try {
+      const result = await DeckService.delete(id);
+      if (result.success) {
+        loadDecks();
+      } else {
+        alert(result.error || 'Erro ao deletar deck');
+      }
+    } catch (error) {
+      alert('Erro ao deletar deck');
     }
   };
 
@@ -44,93 +155,231 @@ export default function RevisoesPage() {
     });
   };
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen px-4 py-12">
-        <div className="max-w-7xl mx-auto fade-in">
-          <div className="text-center">
-            <p className="text-[#64748b] dark:text-[#94a3b8]">Carregando revisões...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen px-4 py-12">
-        <div className="max-w-7xl mx-auto fade-in">
-          <div className="text-center text-red-500">
-            <p>{error}</p>
-            <Button onClick={loadReflections} className="mt-4">
-              Tentar novamente
-            </Button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen px-4 py-12">
-      <div className="max-w-7xl mx-auto fade-in">
-        {/* Header */}
-        <div className="mb-8 space-y-3">
-          <h1 className="text-4xl font-bold text-[#0f172a] dark:text-[#f1f5f9]">
-            Revisões
-          </h1>
-          <p className="text-lg text-[#64748b] dark:text-[#94a3b8]">
-            Revise suas reflexões e aprendizados anteriores
-          </p>
-        </div>
-
-        {/* Reflections List */}
-        {reflections.length === 0 ? (
-          <Card>
-            <div className="text-center py-12">
-              <p className="text-[#64748b] dark:text-[#94a3b8] text-lg">
-                Nenhuma revisão encontrada
-              </p>
-              <p className="text-[#94a3b8] dark:text-[#64748b] text-sm mt-2">
-                Complete pomodoros e crie reflexões para vê-las aqui
-              </p>
-            </div>
-          </Card>
-        ) : (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {reflections.map((reflection) => (
-              <Card key={reflection.id} className="hover:shadow-lg transition-shadow">
-                <div className="space-y-4">
-                  <div>
-                    <h3 className="text-xl font-semibold text-[#0f172a] dark:text-[#f1f5f9] mb-2">
-                      {reflection.topic}
-                    </h3>
-                    <p className="text-sm text-[#64748b] dark:text-[#94a3b8]">
-                      {formatDate(reflection.createdAt)}
-                    </p>
-                  </div>
-
-                  {reflection.summary && (
-                    <p className="text-[#475569] dark:text-[#cbd5e1] line-clamp-3">
-                      {reflection.summary}
-                    </p>
-                  )}
-
-                  <div className="flex items-center justify-between pt-4 border-t border-[#e2e8f0] dark:border-[#334155]">
-                    <Link
-                      href={`/reflection/${reflection.id}`}
-                      className="text-sm text-[#0369a1] dark:text-[#7dd3fc] hover:text-[#0284c7] dark:hover:text-[#bae6fd] transition-colors font-medium"
-                    >
-                      Ver detalhes →
-                    </Link>
-                  </div>
-                </div>
-              </Card>
-            ))}
+    <Layout>
+      <div className="min-h-screen px-4 py-12">
+        <div className="max-w-7xl mx-auto fade-in">
+          {/* Header */}
+          <div className="mb-8 space-y-3">
+            <h1 className="text-4xl font-bold text-[#0f172a] dark:text-[#f1f5f9]">
+              Revisões
+            </h1>
+            <p className="text-lg text-[#64748b] dark:text-[#94a3b8]">
+              Gerencie seus decks de estudo e revise suas reflexões
+            </p>
           </div>
-        )}
+
+          {/* Tabs */}
+          <div className="flex gap-2 mb-8 border-b border-[#e2e8f0] dark:border-[#334155]">
+            <button
+              onClick={() => setActiveTab('decks')}
+              className={`
+                px-6 py-3 font-medium transition-colors border-b-2
+                ${
+                  activeTab === 'decks'
+                    ? 'border-[#0369a1] text-[#0369a1] dark:border-[#7dd3fc] dark:text-[#7dd3fc]'
+                    : 'border-transparent text-[#64748b] dark:text-[#94a3b8] hover:text-[#0369a1] dark:hover:text-[#7dd3fc]'
+                }
+              `}
+            >
+              Decks
+            </button>
+            <button
+              onClick={() => setActiveTab('reflections')}
+              className={`
+                px-6 py-3 font-medium transition-colors border-b-2
+                ${
+                  activeTab === 'reflections'
+                    ? 'border-[#0369a1] text-[#0369a1] dark:border-[#7dd3fc] dark:text-[#7dd3fc]'
+                    : 'border-transparent text-[#64748b] dark:text-[#94a3b8] hover:text-[#0369a1] dark:hover:text-[#7dd3fc]'
+                }
+              `}
+            >
+              Reflexões
+            </button>
+          </div>
+
+          {/* Decks Tab */}
+          {activeTab === 'decks' && (
+            <>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-semibold text-[#0f172a] dark:text-[#f1f5f9]">
+                  Meus Decks
+                </h2>
+                <Button onClick={() => handleOpenModal()} size="lg">
+                  + Novo Deck
+                </Button>
+              </div>
+
+              {isLoadingDecks ? (
+                <div className="text-center py-12 text-[#64748b] dark:text-[#94a3b8]">
+                  Carregando decks...
+                </div>
+              ) : decks.length === 0 ? (
+                <Card className="text-center py-12">
+                  <p className="text-[#64748b] dark:text-[#94a3b8] mb-4">
+                    Você ainda não tem nenhum deck
+                  </p>
+                  <Button onClick={() => handleOpenModal()}>Criar primeiro deck</Button>
+                </Card>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {decks.map((deck) => (
+                    <Card key={deck.id} className="hover:shadow-lg transition-shadow">
+                      <div className="flex flex-col h-full">
+                        <div className="flex-1">
+                          <h3 className="text-xl font-semibold text-[#0f172a] dark:text-[#f1f5f9] mb-2">
+                            {deck.name}
+                          </h3>
+                          {deck.description && (
+                            <p className="text-sm text-[#64748b] dark:text-[#94a3b8] mb-4 line-clamp-3">
+                              {deck.description}
+                            </p>
+                          )}
+                          <div className="text-xs text-[#64748b] dark:text-[#94a3b8]">
+                            Criado em {new Date(deck.createdAt).toLocaleDateString('pt-BR')}
+                          </div>
+                        </div>
+                        <div className="flex gap-2 mt-4 pt-4 border-t border-white/20 dark:border-slate-700/30">
+                          <Button
+                            variant="primary"
+                            size="sm"
+                            className="flex-1"
+                            onClick={() => {
+                              // TODO: Navegar para detalhes do deck quando implementar
+                              alert('Funcionalidade de visualizar deck em desenvolvimento');
+                            }}
+                          >
+                            Abrir
+                          </Button>
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            onClick={() => handleOpenModal(deck)}
+                          >
+                            Editar
+                          </Button>
+                          <Button
+                            variant="danger"
+                            size="sm"
+                            onClick={() => handleDelete(deck.id)}
+                          >
+                            Deletar
+                          </Button>
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+
+          {/* Reflections Tab */}
+          {activeTab === 'reflections' && (
+            <>
+              <div className="mb-6">
+                <h2 className="text-2xl font-semibold text-[#0f172a] dark:text-[#f1f5f9]">
+                  Minhas Reflexões
+                </h2>
+              </div>
+
+              {isLoadingReflections ? (
+                <div className="text-center py-12 text-[#64748b] dark:text-[#94a3b8]">
+                  Carregando revisões...
+                </div>
+              ) : reflections.length === 0 ? (
+                <Card>
+                  <div className="text-center py-12">
+                    <p className="text-[#64748b] dark:text-[#94a3b8] text-lg">
+                      Nenhuma revisão encontrada
+                    </p>
+                    <p className="text-[#94a3b8] dark:text-[#64748b] text-sm mt-2">
+                      Complete pomodoros e crie reflexões para vê-las aqui
+                    </p>
+                  </div>
+                </Card>
+              ) : (
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                  {reflections.map((reflection) => (
+                    <Card key={reflection.id} className="hover:shadow-lg transition-shadow">
+                      <div className="space-y-4">
+                        <div>
+                          <h3 className="text-xl font-semibold text-[#0f172a] dark:text-[#f1f5f9] mb-2">
+                            {reflection.topic}
+                          </h3>
+                          <p className="text-sm text-[#64748b] dark:text-[#94a3b8]">
+                            {formatDate(reflection.createdAt)}
+                          </p>
+                        </div>
+
+                        {reflection.summary && (
+                          <p className="text-[#475569] dark:text-[#cbd5e1] line-clamp-3">
+                            {reflection.summary}
+                          </p>
+                        )}
+
+                        <div className="flex items-center justify-between pt-4 border-t border-[#e2e8f0] dark:border-[#334155]">
+                          <Link
+                            href={`/reflection/${reflection.id}`}
+                            className="text-sm text-[#0369a1] dark:text-[#7dd3fc] hover:text-[#0284c7] dark:hover:text-[#bae6fd] transition-colors font-medium"
+                          >
+                            Ver detalhes →
+                          </Link>
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+
+          {/* Create/Edit Deck Modal */}
+          <Modal
+            isOpen={isModalOpen}
+            onClose={handleCloseModal}
+            title={editingDeck ? 'Editar Deck' : 'Criar Novo Deck'}
+            footer={
+              <>
+                <Button variant="ghost" onClick={handleCloseModal} disabled={isSubmitting}>
+                  Cancelar
+                </Button>
+                <Button onClick={handleSubmit} disabled={isSubmitting}>
+                  {isSubmitting ? 'Salvando...' : editingDeck ? 'Salvar' : 'Criar'}
+                </Button>
+              </>
+            }
+          >
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {error && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+                  {error}
+                </div>
+              )}
+
+              <Input
+                label="Nome do Deck"
+                placeholder="Ex: Vocabulário Inglês"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                required
+                maxLength={100}
+                disabled={isSubmitting}
+              />
+
+              <Textarea
+                label="Descrição (opcional)"
+                placeholder="Descreva o propósito deste deck..."
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                rows={4}
+                disabled={isSubmitting}
+              />
+            </form>
+          </Modal>
+        </div>
       </div>
-    </div>
+    </Layout>
   );
 }
-

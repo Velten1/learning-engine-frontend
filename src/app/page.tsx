@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Layout from '@/components/Layout';
 import PomodoroTimer from '@/components/PomodoroTimer';
 import { HistoryService } from '@/services/historyService';
 import type { TodayStats } from '@/api/history';
@@ -30,8 +31,9 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-12">
-      <div className="w-full max-w-2xl fade-in">
+    <Layout>
+      <div className="min-h-screen flex items-center justify-center px-4 py-12">
+        <div className="w-full max-w-2xl fade-in">
         <div className="space-y-8">
           {/* Header */}
           <div className="text-center space-y-3">
@@ -69,6 +71,7 @@ export default function Home() {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </Layout>
   );
 }
