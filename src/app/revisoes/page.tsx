@@ -4,19 +4,26 @@ import { useState, useEffect } from 'react';
 import Layout from '@/components/Layout';
 import { ReflectionService } from '@/services/reflectionService';
 import { DeckService } from '@/services/deckService';
+import { CardService } from '@/services/cardService';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Modal from '@/components/ui/Modal';
 import Input from '@/components/ui/Input';
 import Textarea from '@/components/ui/Textarea';
+import CardList from '@/components/CardList';
+import CardModal from '@/components/CardModal';
 import type { Reflection } from '@/api/reflection';
 import type { Deck } from '@/api/deck';
+import type { Card as CardType } from '@/api/card';
 import Link from 'next/link';
 
 type TabType = 'reflections' | 'decks';
+type DeckViewType = 'list' | 'detail';
 
 export default function RevisoesPage() {
   const [activeTab, setActiveTab] = useState<TabType>('decks');
+  const [deckView, setDeckView] = useState<DeckViewType>('list');
+  const [selectedDeck, setSelectedDeck] = useState<Deck | null>(null);
   
   // Reflections state
   const [reflections, setReflections] = useState<Reflection[]>([]);
@@ -26,15 +33,25 @@ export default function RevisoesPage() {
   const [decks, setDecks] = useState<Deck[]>([]);
   const [isLoadingDecks, setIsLoadingDecks] = useState(false);
   
-  // Modal state
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  // Cards state
+  const [cards, setCards] = useState<CardType[]>([]);
+  const [isLoadingCards, setIsLoadingCards] = useState(false);
+  
+  // Deck modal state
+  const [isDeckModalOpen, setIsDeckModalOpen] = useState(false);
   const [editingDeck, setEditingDeck] = useState<Deck | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formData, setFormData] = useState({
+  const [isSubmittingDeck, setIsSubmittingDeck] = useState(false);
+  const [deckFormData, setDeckFormData] = useState({
     name: '',
     description: '',
   });
-  const [error, setError] = useState<string | null>(null);
+  const [deckError, setDeckError] = useState<string | null>(null);
+
+  // Card modal state
+  const [isCardModalOpen, setIsCardModalOpen] = useState(false);
+  const [editingCard, setEditingCard] = useState<CardType | null>(null);
+  const [isSubmittingCard, setIsSubmittingCard] = useState(false);
+  const [cardError, setCardError] = useState<string | null>(null);
 
   useEffect(() => {
     if (activeTab === 'reflections') {
@@ -43,6 +60,12 @@ export default function RevisoesPage() {
       loadDecks();
     }
   }, [activeTab]);
+
+  useEffect(() => {
+    if (selectedDeck && deckView === 'detail') {
+      loadCards();
+    }
+  }, [selectedDeck, deckView]);
 
   // Load reflections
   const loadReflections = async () => {
@@ -73,38 +96,56 @@ export default function RevisoesPage() {
     }
   };
 
-  // Deck modal handlers
-  const handleOpenModal = (deck?: Deck) => {
+  // Load cards
+  const loadCards = async () => {
+    if (!selectedDeck) return;
+    
+    setIsLoadingCards(true);
+    try {
+      const result = await CardService.getByDeckId(selectedDeck.id);
+      if (result.success && result.data) {
+        setCards(result.data);
+      }
+    } catch (err) {
+      console.error('Erro ao carregar cards:', err);
+      setCards([]);
+    } finally {
+      setIsLoadingCards(false);
+    }
+  };
+
+  // Deck handlers
+  const handleOpenDeckModal = (deck?: Deck) => {
     if (deck) {
       setEditingDeck(deck);
-      setFormData({
+      setDeckFormData({
         name: deck.name,
         description: deck.description || '',
       });
     } else {
       setEditingDeck(null);
-      setFormData({ name: '', description: '' });
+      setDeckFormData({ name: '', description: '' });
     }
-    setError(null);
-    setIsModalOpen(true);
+    setDeckError(null);
+    setIsDeckModalOpen(true);
   };
 
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
+  const handleCloseDeckModal = () => {
+    setIsDeckModalOpen(false);
     setEditingDeck(null);
-    setFormData({ name: '', description: '' });
-    setError(null);
+    setDeckFormData({ name: '', description: '' });
+    setDeckError(null);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleDeckSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
-    setIsSubmitting(true);
+    setDeckError(null);
+    setIsSubmittingDeck(true);
 
     try {
       const data = {
-        name: formData.name.trim(),
-        description: formData.description.trim() || null,
+        name: deckFormData.name.trim(),
+        description: deckFormData.description.trim() || null,
       };
 
       let result;
@@ -115,32 +156,111 @@ export default function RevisoesPage() {
       }
 
       if (result.success) {
-        handleCloseModal();
+        handleCloseDeckModal();
         loadDecks();
       } else {
-        setError(result.error || 'Erro ao salvar deck');
+        setDeckError(result.error || 'Erro ao salvar deck');
       }
     } catch (error) {
-      setError('Erro ao salvar deck');
+      setDeckError('Erro ao salvar deck');
     } finally {
-      setIsSubmitting(false);
+      setIsSubmittingDeck(false);
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Tem certeza que deseja deletar este deck? Esta ação não pode ser desfeita.')) {
+  const handleDeleteDeck = async (id: string) => {
+    if (!confirm('Tem certeza que deseja deletar este deck? Todos os cards serão deletados também.')) {
       return;
     }
 
     try {
       const result = await DeckService.delete(id);
       if (result.success) {
+        if (selectedDeck?.id === id) {
+          setSelectedDeck(null);
+          setDeckView('list');
+        }
         loadDecks();
       } else {
         alert(result.error || 'Erro ao deletar deck');
       }
     } catch (error) {
       alert('Erro ao deletar deck');
+    }
+  };
+
+  const handleOpenDeck = (deck: Deck) => {
+    setSelectedDeck(deck);
+    setDeckView('detail');
+  };
+
+  const handleBackToDecks = () => {
+    setSelectedDeck(null);
+    setDeckView('list');
+    setCards([]);
+  };
+
+  // Card handlers
+  const handleOpenCardModal = (card?: CardType) => {
+    if (card) {
+      setEditingCard(card);
+    } else {
+      setEditingCard(null);
+    }
+    setCardError(null);
+    setIsCardModalOpen(true);
+  };
+
+  const handleCloseCardModal = () => {
+    setIsCardModalOpen(false);
+    setEditingCard(null);
+    setCardError(null);
+  };
+
+  const handleCardSubmit = async (data: { front: string; back: string }) => {
+    if (!selectedDeck) return;
+
+    setCardError(null);
+    setIsSubmittingCard(true);
+
+    try {
+      let result;
+      if (editingCard) {
+        result = await CardService.update(editingCard.id, data);
+      } else {
+        result = await CardService.create({
+          deckId: selectedDeck.id,
+          ...data,
+        });
+      }
+
+      if (result.success) {
+        handleCloseCardModal();
+        loadCards();
+      } else {
+        setCardError(result.error || 'Erro ao salvar card');
+      }
+    } catch (error) {
+      setCardError('Erro ao salvar card');
+    } finally {
+      setIsSubmittingCard(false);
+    }
+  };
+
+  const handleDeleteCard = async (cardId: string) => {
+    if (!confirm('Tem certeza que deseja deletar este card?')) {
+      return;
+    }
+
+    try {
+      const result = await CardService.delete(cardId);
+      if (result.success) {
+        loadCards();
+      } else {
+        alert(result.error || 'Erro ao deletar card');
+      }
+    } catch (error) {
+      alert('Erro ao deletar card');
     }
   };
 
@@ -155,6 +275,58 @@ export default function RevisoesPage() {
     });
   };
 
+  // Deck Detail View
+  if (deckView === 'detail' && selectedDeck) {
+    return (
+      <Layout>
+        <div className="min-h-screen px-4 py-12">
+          <div className="max-w-7xl mx-auto fade-in">
+            {/* Header */}
+            <div className="mb-6">
+              <Button variant="ghost" onClick={handleBackToDecks} className="mb-4">
+                ← Voltar para Decks
+              </Button>
+              <div className="flex items-center justify-between">
+                <div>
+                  <h1 className="text-3xl font-bold text-[#0f172a] dark:text-[#f1f5f9]">
+                    {selectedDeck.name}
+                  </h1>
+                  {selectedDeck.description && (
+                    <p className="text-[#64748b] dark:text-[#94a3b8] mt-2">
+                      {selectedDeck.description}
+                    </p>
+                  )}
+                </div>
+                <Button onClick={() => handleOpenCardModal()} size="lg">
+                  + Novo Card
+                </Button>
+              </div>
+            </div>
+
+            {/* Cards List */}
+            <CardList
+              cards={cards}
+              onEdit={handleOpenCardModal}
+              onDelete={handleDeleteCard}
+              isLoading={isLoadingCards}
+            />
+
+            {/* Card Modal */}
+            <CardModal
+              isOpen={isCardModalOpen}
+              onClose={handleCloseCardModal}
+              onSubmit={handleCardSubmit}
+              card={editingCard}
+              isLoading={isSubmittingCard}
+              error={cardError}
+            />
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  // Main View
   return (
     <Layout>
       <div className="min-h-screen px-4 py-12">
@@ -206,7 +378,7 @@ export default function RevisoesPage() {
                 <h2 className="text-2xl font-semibold text-[#0f172a] dark:text-[#f1f5f9]">
                   Meus Decks
                 </h2>
-                <Button onClick={() => handleOpenModal()} size="lg">
+                <Button onClick={() => handleOpenDeckModal()} size="lg">
                   + Novo Deck
                 </Button>
               </div>
@@ -220,7 +392,7 @@ export default function RevisoesPage() {
                   <p className="text-[#64748b] dark:text-[#94a3b8] mb-4">
                     Você ainda não tem nenhum deck
                   </p>
-                  <Button onClick={() => handleOpenModal()}>Criar primeiro deck</Button>
+                  <Button onClick={() => handleOpenDeckModal()}>Criar primeiro deck</Button>
                 </Card>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -245,24 +417,21 @@ export default function RevisoesPage() {
                             variant="primary"
                             size="sm"
                             className="flex-1"
-                            onClick={() => {
-                              // TODO: Navegar para detalhes do deck quando implementar
-                              alert('Funcionalidade de visualizar deck em desenvolvimento');
-                            }}
+                            onClick={() => handleOpenDeck(deck)}
                           >
                             Abrir
                           </Button>
                           <Button
                             variant="secondary"
                             size="sm"
-                            onClick={() => handleOpenModal(deck)}
+                            onClick={() => handleOpenDeckModal(deck)}
                           >
                             Editar
                           </Button>
                           <Button
                             variant="danger"
                             size="sm"
-                            onClick={() => handleDelete(deck.id)}
+                            onClick={() => handleDeleteDeck(deck.id)}
                           >
                             Deletar
                           </Button>
@@ -337,44 +506,44 @@ export default function RevisoesPage() {
 
           {/* Create/Edit Deck Modal */}
           <Modal
-            isOpen={isModalOpen}
-            onClose={handleCloseModal}
+            isOpen={isDeckModalOpen}
+            onClose={handleCloseDeckModal}
             title={editingDeck ? 'Editar Deck' : 'Criar Novo Deck'}
             footer={
               <>
-                <Button variant="ghost" onClick={handleCloseModal} disabled={isSubmitting}>
+                <Button variant="ghost" onClick={handleCloseDeckModal} disabled={isSubmittingDeck}>
                   Cancelar
                 </Button>
-                <Button onClick={handleSubmit} disabled={isSubmitting}>
-                  {isSubmitting ? 'Salvando...' : editingDeck ? 'Salvar' : 'Criar'}
+                <Button onClick={handleDeckSubmit} disabled={isSubmittingDeck}>
+                  {isSubmittingDeck ? 'Salvando...' : editingDeck ? 'Salvar' : 'Criar'}
                 </Button>
               </>
             }
           >
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {error && (
+            <form onSubmit={handleDeckSubmit} className="space-y-4">
+              {deckError && (
                 <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
-                  {error}
+                  {deckError}
                 </div>
               )}
 
               <Input
                 label="Nome do Deck"
                 placeholder="Ex: Vocabulário Inglês"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                value={deckFormData.name}
+                onChange={(e) => setDeckFormData({ ...deckFormData, name: e.target.value })}
                 required
                 maxLength={100}
-                disabled={isSubmitting}
+                disabled={isSubmittingDeck}
               />
 
               <Textarea
                 label="Descrição (opcional)"
                 placeholder="Descreva o propósito deste deck..."
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                value={deckFormData.description}
+                onChange={(e) => setDeckFormData({ ...deckFormData, description: e.target.value })}
                 rows={4}
-                disabled={isSubmitting}
+                disabled={isSubmittingDeck}
               />
             </form>
           </Modal>

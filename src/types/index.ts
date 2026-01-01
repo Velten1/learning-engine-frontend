@@ -39,4 +39,19 @@ export interface Deck {
   updatedAt: string
 }
 
+export interface Card {
+  id: string
+  deckId: string
+  front: string
+  back: string
+  nextReviewAt: string
+  createdAt: string
+  updatedAt: string
+  deck?: {
+    id: string
+    name: string
+    userId: string
+  }
+}
+
 
