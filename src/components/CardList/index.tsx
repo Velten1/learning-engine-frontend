@@ -52,7 +52,7 @@ export default function CardList({ cards, onEdit, onDelete, isLoading }: CardLis
                 <div className="text-xs font-medium text-[#64748b] dark:text-[#94a3b8] mb-1">
                   Verso
                 </div>
-                <p className="text-sm text-[#475569] dark:text-[#cbd5e1] line-clamp-2">
+                <p className="text-sm text-[#475569] dark:text-[#cbd5e1] line-clamp-2 blur-md select-none pointer-events-none">
                   {card.back}
                 </p>
               </div>
@@ -80,4 +80,5 @@ export default function CardList({ cards, onEdit, onDelete, isLoading }: CardLis
     </div>
   );
 }
+
 

@@ -41,6 +41,32 @@ export interface CardResponse {
   };
 }
 
+export interface DeckStats {
+  deck: {
+    id: string;
+    name: string;
+    description: string | null;
+  };
+  stats: {
+    new: number;
+    learning: number;
+    due: number;
+  };
+}
+
+export interface DeckWithStats {
+  id: string;
+  name: string;
+  description: string | null;
+  createdAt: string;
+  updatedAt: string;
+  stats: {
+    new: number;
+    learning: number;
+    due: number;
+  };
+}
+
 // Criar novo card
 export async function createCard(data: CreateCardData): Promise<CardResponse> {
   return apiRequest<CardResponse>('/api/cards', {
@@ -81,3 +107,37 @@ export async function deleteCard(id: string): Promise<CardResponse> {
   });
 }
 
+// Obter cards novos (nunca revisados)
+export async function getNewCards(): Promise<CardResponse[]> {
+  return apiRequest<CardResponse[]>('/api/cards/stats/new', {
+    method: 'GET',
+  });
+}
+
+// Obter cards em aprendizado
+export async function getCardsInLearning(): Promise<CardResponse[]> {
+  return apiRequest<CardResponse[]>('/api/cards/stats/learning', {
+    method: 'GET',
+  });
+}
+
+// Obter cards prontos para revisão
+export async function getCardsDueForReview(): Promise<CardResponse[]> {
+  return apiRequest<CardResponse[]>('/api/cards/stats/due', {
+    method: 'GET',
+  });
+}
+
+// Obter estatísticas de um deck específico
+export async function getDeckStats(deckId: string): Promise<DeckStats> {
+  return apiRequest<DeckStats>(`/api/cards/deck/${deckId}/stats`, {
+    method: 'GET',
+  });
+}
+
+// Obter todos os decks com suas estatísticas
+export async function getDecksWithStats(): Promise<DeckWithStats[]> {
+  return apiRequest<DeckWithStats[]>('/api/cards/decks/stats', {
+    method: 'GET',
+  });
+}

@@ -85,5 +85,88 @@ export class CardService {
       };
     }
   }
-}
 
+  // Obter cards novos
+  static async getNewCards() {
+    try {
+      const cards = await cardApi.getNewCards();
+      return {
+        success: true,
+        data: cards,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Erro ao obter cards novos',
+        data: [] as cardApi.Card[],
+      };
+    }
+  }
+
+  // Obter cards em aprendizado
+  static async getCardsInLearning() {
+    try {
+      const cards = await cardApi.getCardsInLearning();
+      return {
+        success: true,
+        data: cards,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Erro ao obter cards em aprendizado',
+        data: [] as cardApi.Card[],
+      };
+    }
+  }
+
+  // Obter cards prontos para revisão
+  static async getCardsDueForReview() {
+    try {
+      const cards = await cardApi.getCardsDueForReview();
+      return {
+        success: true,
+        data: cards,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Erro ao obter cards para revisão',
+        data: [] as cardApi.Card[],
+      };
+    }
+  }
+
+  // Obter estatísticas de um deck específico
+  static async getDeckStats(deckId: string) {
+    try {
+      const stats = await cardApi.getDeckStats(deckId);
+      return {
+        success: true,
+        data: stats,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Erro ao obter estatísticas do deck',
+      };
+    }
+  }
+
+  // Obter todos os decks com suas estatísticas
+  static async getDecksWithStats() {
+    try {
+      const decks = await cardApi.getDecksWithStats();
+      return {
+        success: true,
+        data: decks,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Erro ao obter decks com estatísticas',
+        data: [] as cardApi.DeckWithStats[],
+      };
+    }
+  }
+}

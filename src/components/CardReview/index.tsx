@@ -4,57 +4,102 @@ import { useState } from 'react';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import type { Card as CardType } from '@/api/card';
+import { ReviewRating } from '@/api/review';
 
 interface CardReviewProps {
   card: CardType;
-  onRate: (rating: 'WRONG' | 'GOOD' | 'EASY') => Promise<void>;
+  onRate: (rating: ReviewRating) => Promise<void>;
   onNext?: () => void;
   isLoading?: boolean;
+  cardNumber?: number;
+  totalCards?: number;
 }
 
 type ReviewState = 'front' | 'back';
 
-export default function CardReview({ card, onRate, onNext, isLoading }: CardReviewProps) {
+export default function CardReview({ 
+  card, 
+  onRate, 
+  onNext, 
+  isLoading,
+  cardNumber,
+  totalCards 
+}: CardReviewProps) {
   const [state, setState] = useState<ReviewState>('front');
-  const [selectedRating, setSelectedRating] = useState<'WRONG' | 'GOOD' | 'EASY' | null>(null);
+  const [selectedRating, setSelectedRating] = useState<ReviewRating | null>(null);
+  const [isFlipping, setIsFlipping] = useState(false);
 
   const handleShowAnswer = () => {
-    setState('back');
+    setIsFlipping(true);
+    setTimeout(() => {
+      setState('back');
+      setIsFlipping(false);
+    }, 150);
   };
 
-  const handleRate = async (rating: 'WRONG' | 'GOOD' | 'EASY') => {
+  const handleRate = async (rating: ReviewRating) => {
     setSelectedRating(rating);
     await onRate(rating);
     if (onNext) {
       setTimeout(() => {
         setState('front');
         setSelectedRating(null);
+        setIsFlipping(false);
         onNext();
       }, 300);
     }
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto">
-      <Card className="min-h-[400px] flex flex-col">
+    <div className="w-full max-w-3xl mx-auto">
+      {/* Progress Bar */}
+      {totalCards !== undefined && cardNumber !== undefined && (
+        <div className="mb-6">
+          <div className="flex items-center justify-between text-sm text-[#64748b] dark:text-[#94a3b8] mb-2">
+            <span>Card {cardNumber} de {totalCards}</span>
+            <span>{Math.round((cardNumber / totalCards) * 100)}%</span>
+          </div>
+          <div className="w-full bg-[#e2e8f0] dark:bg-[#334155] rounded-full h-2">
+            <div
+              className="bg-[#0369a1] dark:bg-[#7dd3fc] h-2 rounded-full transition-all duration-300"
+              style={{ width: `${(cardNumber / totalCards) * 100}%` }}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Card */}
+      <Card 
+        className={`
+          min-h-[500px] flex flex-col transition-all duration-300
+          ${isFlipping ? 'scale-95 opacity-50' : 'scale-100 opacity-100'}
+        `}
+      >
+        {/* Deck Name */}
+        {card.deck && (
+          <div className="text-xs font-medium text-[#64748b] dark:text-[#94a3b8] mb-4 px-6 pt-6">
+            {card.deck.name}
+          </div>
+        )}
+
         {/* Card Content */}
         <div className="flex-1 flex items-center justify-center p-8">
           <div className="w-full text-center">
             {state === 'front' ? (
-              <div className="space-y-4">
-                <div className="text-sm font-medium text-[#64748b] dark:text-[#94a3b8] mb-4">
-                  Frente
+              <div className="space-y-6">
+                <div className="text-xs font-semibold uppercase tracking-wider text-[#64748b] dark:text-[#94a3b8] mb-6">
+                  Pergunta
                 </div>
-                <p className="text-2xl md:text-3xl font-medium text-[#0f172a] dark:text-[#f1f5f9] leading-relaxed whitespace-pre-wrap">
+                <p className="text-3xl md:text-4xl font-medium text-[#0f172a] dark:text-[#f1f5f9] leading-relaxed whitespace-pre-wrap break-words">
                   {card.front}
                 </p>
               </div>
             ) : (
-              <div className="space-y-6">
-                <div className="text-sm font-medium text-[#64748b] dark:text-[#94a3b8] mb-4">
-                  Verso
+              <div className="space-y-6 animate-fade-in">
+                <div className="text-xs font-semibold uppercase tracking-wider text-[#64748b] dark:text-[#94a3b8] mb-6">
+                  Resposta
                 </div>
-                <p className="text-2xl md:text-3xl font-medium text-[#0f172a] dark:text-[#f1f5f9] leading-relaxed whitespace-pre-wrap">
+                <p className="text-3xl md:text-4xl font-medium text-[#0f172a] dark:text-[#f1f5f9] leading-relaxed whitespace-pre-wrap break-words">
                   {card.back}
                 </p>
               </div>
@@ -63,19 +108,19 @@ export default function CardReview({ card, onRate, onNext, isLoading }: CardRevi
         </div>
 
         {/* Actions */}
-        <div className="border-t border-white/20 dark:border-slate-700/30 p-6">
+        <div className="border-t border-white/20 dark:border-slate-700/30 p-6 bg-[#f8fafc] dark:bg-[#0f172a]">
           {state === 'front' ? (
             <Button
               onClick={handleShowAnswer}
-              className="w-full"
+              className="w-full py-4 text-lg font-semibold"
               size="lg"
               disabled={isLoading}
             >
               Mostrar Resposta
             </Button>
           ) : (
-            <div className="space-y-3">
-              <div className="text-sm text-center text-[#64748b] dark:text-[#94a3b8] mb-4">
+            <div className="space-y-4">
+              <div className="text-sm font-medium text-center text-[#64748b] dark:text-[#94a3b8] mb-2">
                 Como foi sua resposta?
               </div>
               <div className="grid grid-cols-3 gap-3">
@@ -83,33 +128,27 @@ export default function CardReview({ card, onRate, onNext, isLoading }: CardRevi
                   variant="danger"
                   onClick={() => handleRate('WRONG')}
                   disabled={isLoading || selectedRating !== null}
-                  className="py-3"
+                  className="py-4 h-auto flex flex-col items-center justify-center gap-1"
                 >
-                  <div className="flex flex-col items-center">
-                    <span className="font-semibold">Errado</span>
-                    <span className="text-xs opacity-75">3 min</span>
-                  </div>
+                  <span className="font-bold text-base">Errado</span>
+                  <span className="text-xs opacity-75 font-normal">3 min</span>
                 </Button>
                 <Button
                   variant="secondary"
                   onClick={() => handleRate('GOOD')}
                   disabled={isLoading || selectedRating !== null}
-                  className="py-3"
+                  className="py-4 h-auto flex flex-col items-center justify-center gap-1"
                 >
-                  <div className="flex flex-col items-center">
-                    <span className="font-semibold">Bom</span>
-                    <span className="text-xs opacity-75">10 min</span>
-                  </div>
+                  <span className="font-bold text-base">Bom</span>
+                  <span className="text-xs opacity-75 font-normal">10 min</span>
                 </Button>
                 <Button
                   onClick={() => handleRate('EASY')}
                   disabled={isLoading || selectedRating !== null}
-                  className="py-3 bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600"
+                  className="py-4 h-auto flex flex-col items-center justify-center gap-1 bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600"
                 >
-                  <div className="flex flex-col items-center">
-                    <span className="font-semibold">Fácil</span>
-                    <span className="text-xs opacity-75">1 dia</span>
-                  </div>
+                  <span className="font-bold text-base">Fácil</span>
+                  <span className="text-xs opacity-75 font-normal">1 dia</span>
                 </Button>
               </div>
             </div>
@@ -119,4 +158,3 @@ export default function CardReview({ card, onRate, onNext, isLoading }: CardRevi
     </div>
   );
 }
-
