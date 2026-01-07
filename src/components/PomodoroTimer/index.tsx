@@ -13,7 +13,7 @@ import ReflectionModal from '@/components/ReflectionModal';
 export default function PomodoroTimer() {
   const [currentPomodoro, setCurrentPomodoro] =
     useState<CurrentPomodoroResponse | null>(null);
-  const [time, setTime] = useState(5); // 5 segundos para testes
+  const [time, setTime] = useState(20 * 60); // 20 minutos
   const [showAbandonModal, setShowAbandonModal] = useState(false);
   const [showResetModal, setShowResetModal] = useState(false);
   const [showReflectionModal, setShowReflectionModal] = useState(false);
@@ -44,7 +44,7 @@ export default function PomodoroTimer() {
           // Sem token, parar timer e resetar estados
           clearInterval(interval);
           setCurrentPomodoro(null);
-          setTime(5);
+          setTime(20 * 60);
           return;
         }
       }
@@ -84,7 +84,7 @@ export default function PomodoroTimer() {
         );
         setTime(remainingSeconds);
       } else {
-        setTime(5);
+        setTime(20 * 60);
       }
     } catch (err) {
       console.error('Erro ao carregar pomodoro:', err);
@@ -333,7 +333,7 @@ export default function PomodoroTimer() {
             <div className="h-1 bg-[#e2e8f0] rounded-full overflow-hidden">
               <div
                 className="h-full bg-gradient-to-r from-[#0369a1] to-[#0284c7] rounded-full transition-all duration-1000"
-                style={{ width: `${((5 - time) / 5) * 100}%` }}
+                style={{ width: `${((20 * 60 - time) / (20 * 60)) * 100}%` }}
               />
             </div>
           </div>
@@ -389,7 +389,7 @@ export default function PomodoroTimer() {
       >
         <div className="space-y-4">
           <p className="text-[#64748b]">
-            Você tem certeza que deseja resetar o cronômetro? O tempo será reiniciado para 5 segundos.
+            Você tem certeza que deseja resetar o cronômetro? O tempo será reiniciado para 20 minutos.
           </p>
         </div>
       </Modal>

@@ -409,3 +409,4 @@ O Next.js possui hot reload automático. Alterações em arquivos são refletida
 
 Este projeto está sob a licença MIT.
 
+
